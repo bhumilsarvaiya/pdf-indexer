@@ -55,43 +55,66 @@
                   <span v-if="indexed">Indexing completed</span>
                 <br>
               </div>
-              <template v-for="(datas, key) in indexedData" v-if="datas.length > 0 && groupBy === 'alphabet'">
-                <div align="left">
-                  <h2>&nbsp;&nbsp;{{key}}</h2>
+              <div class="row">
+                <div class="col-md-12 view">
+                  <template class="viewByAlpha" v-for="(datas, key) in indexedData" v-if="datas.length > 0 && groupBy === 'alphabet'">
+                    <div align="left">
+                      <h2>&nbsp;&nbsp;{{key}}</h2>
+                    </div>
+                    <div align="left" v-for="data in datas">
+                      <span>
+                        &nbsp;&nbsp;&nbsp;
+                        <b>{{data.value}}</b>
+                        <i>({{data.type}})</i>
+                        &nbsp;
+                        [
+                        <template v-for="page, index in data.pages">
+                          <span class="goto" v-if="index == data.pages.length - 1 && index !== 0" @click="showPage(page)">&nbsp;{{page}}</span>
+                          <span class="goto" v-else-if="index == data.pages.length - 1" @click="showPage(page)">{{page}}</span>
+                          <span class="goto" v-else-if="index == 0" @click="showPage(page)">{{page}},</span>
+                          <span class="goto" v-else @click="showPage(page)">&nbsp;{{page}},</span>
+                        </template>
+                        ]
+                      </span>
+                    </div>
+                  </template>
+                  <template class="viewByPage" v-for="(datas, key) in indexedData3" v-if="datas.length > 0 && groupBy === 'page'">
+                    <div align="left">
+                      <h2>&nbsp;&nbsp;{{key}}</h2>
+                    </div>
+                    <div align="left" v-for="data in datas">
+                      <span>
+                        &nbsp;&nbsp;&nbsp;
+                        <b>{{data.value}}</b>
+                        <i>({{data.type}})</i>
+                      </span>
+                    </div>
+                  </template>
+                  <template class="viewByType" v-for="(datas, key) in indexedData2" v-if="datas.length > 0 && groupBy === 'type'">
+                    <div align="left">
+                      <h2>&nbsp;&nbsp;{{key}}</h2>
+                    </div>
+                    <div align="left" v-for="data in datas">
+                      <span>
+                        &nbsp;&nbsp;&nbsp;
+                        <b>{{data.value}}</b>
+                        &nbsp;
+                        [
+                        <template v-for="page, index in data.pages">
+                          <span class="goto" v-if="index == data.pages.length - 1 && index !== 0" @click="showPage(page, data.value)">&nbsp;{{page}}</span>
+                          <span class="goto" v-else-if="index == data.pages.length - 1" @click="showPage(page, data.value)">{{page}}</span>
+                          <span class="goto" v-else-if="index == 0" @click="showPage(page, data.value)">{{page}},</span>
+                          <span class="goto" v-else @click="showPage(page, data.value)">&nbsp;{{page}},</span>
+                        </template>
+                        ]
+                      </span>
+                    </div>
+                  </template>
                 </div>
-                <div align="left" v-for="data in datas">
-                  <span>
-                    &nbsp;&nbsp;&nbsp;
-                    <b>{{data.value}}</b>
-                    <i>({{data.type}})</i>
-                    &nbsp;{{data.pages}}
-                  </span>
-                </div>
-              </template>
-              <template v-for="(datas, key) in indexedData3" v-if="datas.length > 0 && groupBy === 'page'">
-                <div align="left">
-                  <h2>&nbsp;&nbsp;{{key}}</h2>
-                </div>
-                <div align="left" v-for="data in datas">
-                  <span>
-                    &nbsp;&nbsp;&nbsp;
-                    <b>{{data.value}}</b>
-                    <i>({{data.type}})</i>
-                  </span>
-                </div>
-              </template>
-              <template v-for="(datas, key) in indexedData2" v-if="datas.length > 0 && groupBy === 'type'">
-                <div align="left">
-                  <h2>&nbsp;&nbsp;{{key}}</h2>
-                </div>
-                <div align="left" v-for="data in datas">
-                  <span>
-                    &nbsp;&nbsp;&nbsp;
-                    <b>{{data.value}}</b>
-                    &nbsp;{{data.pages}}
-                  </span>
-                </div>
-              </template>
+              </div>
+              <Modal v-model="showPageModal" :title="'Page: ' + pageToShow" width="60%" loading>
+                <pdf class="markdown" :src="pdfToView" :page="pageToShow + 1" style="display: block;"></pdf>
+              </Modal>
             </div>
           </div>
         </div>
@@ -101,22 +124,26 @@
 </template>
 
 <script>
+import pdf from 'vue-pdf'
 import Vue from 'vue'
 import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import 'vue-awesome/icons'
 import Icon from 'vue-awesome/components/Icon'
+import $ from 'jquery'
 let filePath = '../../static/Critical_Survey_of_World Literature_V1.pdf'
 let pdfUrl = 'http://localhost:8081/getFile/'
 // let extract = require('pdf-text-extract')
-import $ from 'jquery'
 const _ = require('lodash')
 const PDFJS = require('pdfjs-dist')
 // let fs = require('fs')
 const nlp = require('compromise')
 // let natural = require('natural')
 const distance = require('jaro-winkler')
+const jsPDF = require('jspdf')
+let doc = new jsPDF()
+const html2canvas = require('html2canvas')
 // const trie = require('../assets/js/trie.js')
 
 Vue.use(BootstrapVue)
@@ -124,12 +151,14 @@ Vue.use(BootstrapVue)
 export default {
   name: 'HelloWorld',
   components: {
-    Icon
+    Icon, pdf
   },
   data () {
     return {
       page: 1,
       totalPages: false,
+      showPageModal: false,
+      pageToShow: 0,
       range:[0,0],
       minPage: 0,
       maxPage: 0,
@@ -190,7 +219,8 @@ export default {
         'Date': [],
         'Quote': []
       },
-      indexedData3: {}
+      indexedData3: {},
+      pdfToView: null
     }
   },
   async mounted () {
@@ -206,9 +236,9 @@ export default {
       }
       alert(selection.toString())
     })
-    console.log('hello')
     this.filename = this.$route.params.filename
     console.time('pdf read time')
+    this.pdfToView = pdf.createLoadingTask(pdfUrl + this.filename)
     this.pdf = await PDFJS.getDocument(pdfUrl + this.filename)
     this.totalPages = this.pdf.numPages
     this.range[1] = this.totalPages
@@ -216,6 +246,10 @@ export default {
     console.timeEnd('pdf read time')
   },
   methods: {
+    showPage (page, word) {
+      this.pageToShow = page
+      this.showPageModal = true
+    },
     showQoutes () {
       console.log(this.quotes)
     },
@@ -255,7 +289,7 @@ export default {
     insertData (type, data) {
       for (let i = 0; i < this.indexedData[type].length; i++) {
         if (parseInt(distance(this.indexedData[type][i].value, data.value) * 100) >= 89) {
-          this.indexedData[type][i].pages = this.indexedData[type][i].pages.concat(data.pages)
+          this.indexedData[type][i].pages = _.union(this.indexedData[type][i].pages, data.pages)
           return
         }
         if (this.indexedData[type][i].value.localeCompare(data.value) === 1) {
@@ -268,7 +302,7 @@ export default {
     insertData2 (data) {
       for (let i = 0; i < this.indexedData2[data.type].length; i++) {
         if (parseInt(distance(this.indexedData2[data.type][i].value, data.value) * 100) >= 89) {
-          this.indexedData2[data.type][i].pages = this.indexedData2[data.type][i].pages.concat(data.pages)
+          this.indexedData2[data.type][i].pages = _.union(this.indexedData2[data.type][i].pages, data.pages)
           return
         }
         if (this.indexedData2[data.type][i].value.localeCompare(data.value) === 1) {
@@ -338,7 +372,7 @@ export default {
       let dates = await nlp(data).dates().trim().map((m) => m.out('text'))
       for (let i = 0; i < dates.length; i++) {
         let date = dates[i]
-        if (nlp(date).has('#NumericValue') && !(nlp(date).has('#Comparable')) && !(nlp(date).has('#Adjective'))) {
+        if (nlp(date).has('#NumericValue') && !(nlp(date).has('#Adjective'))) {
           await this.refine(date, page, 'Date', extractedData, true)
         }
       }
@@ -556,5 +590,13 @@ a {
   padding-top: 10px;
   padding-left: 2px;
   padding-right: 5px;
+}
+.goto {
+  cursor: pointer;
+  color: darkblue;
+}
+.marker {
+  background-color: yellow;
+  font-weight: bold;
 }
 </style>

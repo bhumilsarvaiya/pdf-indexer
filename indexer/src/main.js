@@ -3,15 +3,24 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-import BootstrapVue from 'bootstrap-vue'
-import ElementUI from 'element-ui'
+import VueProgressBar from 'vue-progressbar'
+import Element from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
+import iView from 'iview';
+import locale from 'iview/dist/locale/en-US';
+import 'iview/dist/styles/iview.css';
 
-Vue.use(ElementUI)
+Vue.use(iView, { locale })
+Vue.use(VueProgressBar, {
+  color: 'rgb(143, 255, 199)',
+  failedColor: 'red',
+  height: '2px',
+  thickness: '5px'
+})
+
+Vue.use(Element)
+
 Vue.config.productionTip = false
-Vue.use(BootstrapVue)
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 /* eslint-disable no-new */
 new Vue({

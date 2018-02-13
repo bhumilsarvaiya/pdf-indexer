@@ -1,4 +1,4 @@
-# pdf-indexer
+# pdf-annotator
 
 > A Vue.js project
 
