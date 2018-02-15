@@ -81,7 +81,7 @@
                   </template>
                   <template class="viewByPage" v-for="(datas, key) in indexedData3" v-if="datas.length > 0 && groupBy === 'page'">
                     <div align="left">
-                      <h2>&nbsp;&nbsp;{{key}}</h2>
+                      <h2 @click="showPage(parseInt(key))" class="goto">&nbsp;&nbsp;{{key}}</h2>
                     </div>
                     <div align="left" v-for="data in datas">
                       <span>
@@ -102,10 +102,10 @@
                         &nbsp;
                         [
                         <template v-for="page, index in data.pages">
-                          <span class="goto" v-if="index == data.pages.length - 1 && index !== 0" @click="showPage(page, data.value)">&nbsp;{{page}}</span>
-                          <span class="goto" v-else-if="index == data.pages.length - 1" @click="showPage(page, data.value)">{{page}}</span>
-                          <span class="goto" v-else-if="index == 0" @click="showPage(page, data.value)">{{page}},</span>
-                          <span class="goto" v-else @click="showPage(page, data.value)">&nbsp;{{page}},</span>
+                          <span class="goto" v-if="index == data.pages.length - 1 && index !== 0" @click="showPage(page)">&nbsp;{{page}}</span>
+                          <span class="goto" v-else-if="index == data.pages.length - 1" @click="showPage(page)">{{page}}</span>
+                          <span class="goto" v-else-if="index == 0" @click="showPage(page)">{{page}},</span>
+                          <span class="goto" v-else @click="showPage(page)">&nbsp;{{page}},</span>
                         </template>
                         ]
                       </span>
@@ -259,7 +259,7 @@ export default {
       element.click();
       document.body.removeChild(element);
     },
-    showPage (page, word) {
+    showPage (page) {
       this.pageToShow = page
       this.showPageModal = true
     },
