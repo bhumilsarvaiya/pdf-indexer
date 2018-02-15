@@ -57,7 +57,7 @@
                 <br>
               </div>
               <div class="row">
-                <div class="col-md-12 view">
+                <div class="col-md-5 view">
                   <template class="viewByAlpha" v-for="(datas, key) in indexedData" v-if="datas.length > 0 && groupBy === 'alphabet'">
                     <div align="left">
                       <h2>&nbsp;&nbsp;{{key}}</h2>
@@ -112,11 +112,10 @@
                     </div>
                   </template>
                 </div>
+                <div class="col-md-7 pdf-view" v-model="showPageModal" align="center">
+                  <pdf class="markdown" :src="pdfToView" :page="pageToShow + 1" style="display: block; width: 80%; margin-top: 15px;"></pdf>
+                </div>
               </div>
-              <Modal class="vertical-center-modal" v-model="showPageModal" :title="'Page: ' + pageToShow" width="50%" loading>
-                <pdf class="markdown" :src="pdfToView" :page="pageToShow + 1" style="display: block;"></pdf>
-                <div slot="footer"></div>
-              </Modal>
             </div>
           </div>
         </div>
@@ -625,5 +624,12 @@ div.ivu-modal-footer {
   div.ivu-modal-footer {
     display: none !important;
   }
+}
+.view {
+  overflow-y: scroll;
+  height: 100vh;
+}
+.pdf-view {
+  box-shadow: inset 0px 0px 20px 0px #0000002b;
 }
 </style>
