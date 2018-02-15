@@ -7,6 +7,7 @@
             <div class="col-md-12 nlp">
               <br>
                 <el-button type="warning" icon="el-icon-search" @click="compromise()">Start Indexing</el-button>
+                <el-button type="info" v-if="download" icon="el-icon-download" @click="downloadRtf()">Download .rtf</el-button>
               <br>
               <div class="row options">
                 <div class="col-md-3 main-range">
@@ -112,8 +113,9 @@
                   </template>
                 </div>
               </div>
-              <Modal v-model="showPageModal" :title="'Page: ' + pageToShow" width="60%" loading>
+              <Modal class="vertical-center-modal" v-model="showPageModal" :title="'Page: ' + pageToShow" width="50%" loading>
                 <pdf class="markdown" :src="pdfToView" :page="pageToShow + 1" style="display: block;"></pdf>
+                <div slot="footer"></div>
               </Modal>
             </div>
           </div>
@@ -144,6 +146,7 @@ const distance = require('jaro-winkler')
 const jsPDF = require('jspdf')
 let doc = new jsPDF()
 const html2canvas = require('html2canvas')
+const htmlToRtf = require('html-to-rtf')
 // const trie = require('../assets/js/trie.js')
 
 Vue.use(BootstrapVue)
@@ -169,6 +172,7 @@ export default {
       indexed: false,
       index: 0,
       filename: null,
+      download: false,
       pdf: null,
       checkedMethods: ['people', 'places', 'organizations', 'urls', 'dates', 'quotes'],
       groupBy: 'alphabet',
@@ -246,6 +250,16 @@ export default {
     console.timeEnd('pdf read time')
   },
   methods: {
+    downloadRtf () {
+      let htmlContent = $('.view').html()
+      let element = document.createElement('a');
+      element.setAttribute('href', 'data:text/rtf;charset=utf-8,' + encodeURIComponent(htmlToRtf.convertHtmlToRtf(htmlContent)));
+      element.setAttribute('download', 'index.rtf');
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    },
     showPage (page, word) {
       this.pageToShow = page
       this.showPageModal = true
@@ -439,6 +453,7 @@ export default {
       return ch.match(/^[a-zA-Z]$/)
     },
     async compromise () {
+      this.download = false
       this.indexedData = {
         '0...9': [],
         'A': [],
@@ -498,6 +513,7 @@ export default {
       this.indexProgress = true
       this.extracted = false
       this.indexProgress = false
+      this.download = true
       // this.indexed = true
       // console.log(extractedData.length)
     },
@@ -598,5 +614,16 @@ a {
 .marker {
   background-color: yellow;
   font-weight: bold;
+}
+div.ivu-modal-footer {
+  display: none !important;
+}
+.vertical-center-modal{
+  .ivu-modal{
+    top: 0;
+  }
+  div.ivu-modal-footer {
+    display: none !important;
+  }
 }
 </style>
