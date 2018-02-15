@@ -632,4 +632,23 @@ div.ivu-modal-footer {
 .pdf-view {
   box-shadow: inset 0px 0px 20px 0px #0000002b;
 }
+::-webkit-scrollbar {
+    width: 10px;
+}
+/* Track */
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey;
+    border-radius: 10px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #274f91;
+    border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #162b4f;
+}
 </style>
