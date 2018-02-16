@@ -633,7 +633,7 @@ div.ivu-modal-footer {
   box-shadow: inset 0px 0px 20px 0px #0000002b;
 }
 ::-webkit-scrollbar {
-    width: 10px;
+    width: 5px;
 }
 /* Track */
 ::-webkit-scrollbar-track {
