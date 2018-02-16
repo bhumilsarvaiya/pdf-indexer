@@ -628,6 +628,7 @@ div.ivu-modal-footer {
 .view {
   overflow-y: scroll;
   height: 100vh;
+  box-shadow: inset 1px 0px 20px 0px #0000002b;
 }
 .pdf-view {
   box-shadow: inset 0px 0px 20px 0px #0000002b;
@@ -637,7 +638,7 @@ div.ivu-modal-footer {
 }
 /* Track */
 ::-webkit-scrollbar-track {
-    box-shadow: inset 0 0 5px grey;
+    box-shadow: inset 0px 0 5px grey;
     border-radius: 10px;
 }
 
